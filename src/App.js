@@ -2,6 +2,7 @@ import {useRef, useEffect} from 'react'
 import './App.css'
 import * as facemash from '@tensorflow-models/face-landmarks-detection'
 import Webcam from 'react-webcam'
+import { input } from '@tensorflow/tfjs'
 
 
 const App = () => {
@@ -9,7 +10,10 @@ const App = () => {
   const canvasRef = useRef(null)
 
   const runFacemesh = async() => {
-    const net = await facemash.load(facemash.SupportedPackage.mediapipeFacemesh)
+    const net = await facemash.load(facemash.SupportedPackages.mediapipeFacemesh)
+    setInterval(() => {
+      detect(net)
+    }, 10)
   }
 
   const detect = async(net) => {
@@ -28,8 +32,20 @@ const App = () => {
 
       canvasRef.current.width = videoWidth
       canvasRef.current.heigth = videoHeigth
+
+      // detection
+
+      const face = await net.estimateFaces({input: video})
+
+      const ctx = canvasRef.current.getContext('2d')
+      requestAnimationFrame(() => {})
     }
   }
+
+  useEffect(() => {
+    runFacemesh()
+  }, [])
+
 
   return (
     <div className='App'>

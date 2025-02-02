@@ -5,8 +5,16 @@ import Webcam from 'react-webcam'
 
 
 const App = () => {
+  const webcamRef = useRef(null)
+
+
+
   return (
-    <div>App</div>
+    <div className='App'>
+      <header className='App-header'>
+        <Webcam ref={webcamRef} className='webcam'/>
+      </header>
+    </div>
   )
 }
 

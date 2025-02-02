@@ -49,3 +49,15 @@
   height: 480px;
   transform: scaleX(-1);
 }
+
+.canvas {
+  position: absolute;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 10;
+  width: 660px;
+  height: 480px;
+  transform: scaleX(-1);
+}

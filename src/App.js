@@ -8,7 +8,9 @@ const App = () => {
   const webcamRef = useRef(null)
   const canvasRef = useRef(null)
 
-
+  const runFacemesh = async() => {
+    const net = await facemash.load(facemash.SupportedPackage.mediapipeFacemesh)
+  }
 
   return (
     <div className='App'>

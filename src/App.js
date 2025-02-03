@@ -1,6 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import './App.css';
-import * as facemesh from '@tensorflow-models/face-landmarks-detection';
+import * as tf from '@tensorflow/tfjs';
+import * as faceLandmarksDetection from '@tensorflow-models/face-landmarks-detection';
 import Webcam from 'react-webcam';
 import { drawMesh } from './utils';
 
@@ -8,14 +9,7 @@ const App = () => {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const runFacemesh = async () => {
-    const net = await facemesh.load(facemesh.SupportedPackages.mediapipeFacemesh);
-    setInterval(() => {
-      detect(net);
-    }, 100);
-  };
-
-  const detect = async (net) => {
+  const detect = useCallback(async (model) => {
     if (
       webcamRef.current &&
       webcamRef.current.video.readyState === 4
@@ -24,32 +18,43 @@ const App = () => {
       const videoWidth = video.videoWidth;
       const videoHeight = video.videoHeight;
 
-      // Set video width & height
       webcamRef.current.video.width = videoWidth;
       webcamRef.current.video.height = videoHeight;
-
-      // Set canvas width & height
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
 
-      // Face detection
-      const face = await net.estimateFaces({ input: video });
+      const faces = await model.estimateFaces({ input: video });
 
       const ctx = canvasRef.current.getContext('2d');
-      requestAnimationFrame(() => {
-        drawMesh(face, ctx);
-      });
+      ctx.clearRect(0, 0, videoWidth, videoHeight);
+      drawMesh(faces, ctx);
     }
-  };
+  }, []);
+
+  const runFaceDetection = useCallback(async () => {
+    const model = await faceLandmarksDetection.load(
+      faceLandmarksDetection.SupportedPackages.mediapipeFacemesh || {},
+      {
+        runtime: 'tfjs',
+      }
+    );
+
+    const detectionInterval = setInterval(() => {
+      detect(model);
+    }, 100);
+
+    return () => clearInterval(detectionInterval);
+  }, [detect]);
 
   useEffect(() => {
-    runFacemesh();
-  }, []);
+    const cleanup = runFaceDetection();
+    return () => cleanup.then((clear) => clear && clear());
+  }, [runFaceDetection]);
 
   return (
     <div className="App">
       <header className="App-header">
-        <Webcam ref={webcamRef} className="webcam" />
+        <Webcam ref={webcamRef} className="webcam" muted playsInline />
         <canvas ref={canvasRef} className="canvas" />
       </header>
     </div>

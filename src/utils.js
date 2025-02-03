@@ -167,6 +167,7 @@ export const TRIANGULATION = [
   372, 353, 390, 339, 249, 339, 448, 255,
 ]
 
+
 // Drawing method
 const drawPath = (ctx, points, closePath) => {
   const region = new Path2D()
